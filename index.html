@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <title>Via Crucis</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-fixed-dim": "#e2b6ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-dim": "#ddd9d5",
+            "secondary-fixed": "#ffdea5",
+            "inverse-on-surface": "#f4f0eb",
+            "secondary-fixed-dim": "#e9c176",
+            "on-tertiary-container": "#d3ae77",
+            "inverse-primary": "#e2b6ff",
+            "secondary-container": "#fed488",
+            "surface-bright": "#fdf9f4",
+            "on-error": "#ffffff",
+            "on-surface": "#1c1c19",
+            "tertiary-fixed": "#ffdeae",
+            "error": "#ba1a1a",
+            "on-tertiary": "#ffffff",
+            "surface": "#fdf9f4",
+            "on-tertiary-fixed-variant": "#5c4215",
+            "surface-container-highest": "#e6e2dd",
+            "primary-container": "#5d327c",
+            "primary": "#451964",
+            "on-primary-container": "#d2a0f3",
+            "tertiary": "#422b01",
+            "on-secondary-container": "#785a1a",
+            "surface-container-high": "#ebe8e3",
+            "inverse-surface": "#31302d",
+            "on-error-container": "#93000a",
+            "secondary": "#775a19",
+            "background": "#fdf9f4",
+            "primary-fixed": "#f3daff",
+            "surface-tint": "#774b97",
+            "tertiary-fixed-dim": "#e7c188",
+            "on-primary-fixed": "#2f004d",
+            "on-secondary-fixed-variant": "#5d4201",
+            "on-secondary": "#ffffff",
+            "surface-container-low": "#f7f3ee",
+            "on-surface-variant": "#4c444f",
+            "outline": "#7d7480",
+            "on-primary": "#ffffff",
+            "on-primary-fixed-variant": "#5e337d",
+            "on-secondary-fixed": "#261900",
+            "on-background": "#1c1c19",
+            "surface-container": "#f1ede8",
+            "outline-variant": "#cec3d0",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#5b4114",
+            "on-tertiary-fixed": "#281800",
+            "surface-variant": "#e6e2dd"
+          },
+          fontFamily: {
+            "headline": ["Noto Serif", "serif"],
+            "body": ["Manrope", "sans-serif"],
+            "label": ["Manrope", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      font-family: 'Manrope', sans-serif;
+      background-color: #fdf9f4;
+      color: #1c1c19;
+      min-height: 100dvh;
+      overscroll-behavior: none;
+    }
+
+    /* Screens */
+    .screen { display: none; }
+    .screen.active { display: block; animation: screenIn 0.28s ease; }
+    @keyframes screenIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Safe-area bottom padding for bottom nav */
+    #bottom-nav {
+      padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
+    }
+    /* Station sticky nav sits just above bottom nav */
+    #station-sticky-nav {
+      bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    }
+    /* Push content above nav */
+    main { padding-bottom: calc(7rem + env(safe-area-inset-bottom)); }
+    /* Extra push when station sticky nav is visible */
+    body.station-active main { padding-bottom: calc(11rem + env(safe-area-inset-bottom)); }
+
+    .editorial-shadow { box-shadow: 0 16px 32px -12px rgba(28,28,25,0.07); }
+
+    /* Station hero placeholder (when no image) */
+    .station-hero-placeholder {
+      background: linear-gradient(160deg, #5d327c 0%, #451964 55%, #2f004d 100%);
+    }
+    /* Thumbnail placeholder */
+    .thumb-placeholder {
+      background: linear-gradient(135deg, #5d327c 0%, #451964 100%);
+    }
+
+    /* Scrollable main on mobile */
+    .screen { min-height: 1px; }
+
+    /* Progress bar transition */
+    #stations-progress-bar { transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
+
+    /* Smooth image load */
+    img { background-color: #e6e2dd; }
+  </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-primary-fixed selection:text-on-primary-fixed">
+
+  <!-- ─── TOP APP BAR ─── -->
+  <header id="top-bar" class="bg-stone-50/90 backdrop-blur-xl sticky top-0 z-50 flex justify-between items-center w-full px-4 py-3 shadow-[0_1px_0_rgba(28,28,25,0.06)]">
+    <!-- Left: context-dependent -->
+    <button id="top-bar-left" onclick="topBarLeftAction()" class="text-purple-900 p-2 rounded-lg hover:bg-purple-50 active:bg-purple-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
+      <span id="top-bar-left-icon" class="material-symbols-outlined">menu</span>
+    </button>
+    <!-- Title -->
+    <button onclick="goHome()" class="font-serif text-xl sm:text-2xl text-purple-900 tracking-widest uppercase select-none">Via Crucis</button>
+    <!-- Right -->
+    <button class="text-purple-900 p-2 rounded-lg hover:bg-purple-50 active:bg-purple-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
+      <span class="material-symbols-outlined">settings</span>
+    </button>
+  </header>
+
+  <!-- ─── MAIN CONTENT ─── -->
+  <main>
+
+    <!-- ════════════════════════════════════════
+         SCREEN: HOME
+    ════════════════════════════════════════ -->
+    <div id="screen-home" class="screen">
+
+      <!-- Hero -->
+      <section class="relative min-h-[65vh] flex items-end overflow-hidden">
+        <div class="absolute inset-0 z-0">
+          <img
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUlrXrBq77WxuIfIiazysfDBshLdipXYl4FArEKhcxgvbQafqjA3F57Y0XSrGWrOgKmKSD4C2ZvVj-sjs3twn3cLA6U4j_ndZstDEOhjxzL7J8sD2yfJekJlfOe1QHNpFn1TBfdFjl-LlAlRwZ_Ku-IpIxUMnVv0DXN0vC1iBFnBiOGkteu5VeMdzoqsiDOPyajNo1cgiSVPcXs3bHA6O5F5NN-TblIOX7AvGRUPxCJNJ04r57MknFtxs1c24kgwkUi-lXeBNmM-0"
+            alt="Ancient stone cross at twilight"
+            class="w-full h-full object-cover"
+          />
+          <div class="absolute inset-0 bg-gradient-to-b from-surface/10 via-surface/20 to-surface"></div>
+        </div>
+        <div class="container mx-auto px-6 relative z-10 pb-12 pt-24">
+          <div class="max-w-xl space-y-6">
+            <span class="font-serif italic text-primary text-lg tracking-wide opacity-80 block">The Lenten Season</span>
+            <h2 class="font-serif text-5xl sm:text-6xl md:text-7xl text-on-surface leading-tight tracking-tight">
+              The Way<br/>of the Cross
+            </h2>
+            <p class="text-on-surface-variant text-base sm:text-lg font-light leading-relaxed max-w-md">
+              A contemplative journey through the 14 Stations, tracing the path of Christ from condemnation to the tomb.
+            </p>
+            <div class="pt-2">
+              <button onclick="goStations()" class="bg-secondary-container text-on-secondary-container font-serif text-lg px-8 py-4 rounded-xl editorial-shadow hover:brightness-95 active:scale-95 transition-all duration-300 flex items-center gap-3 group">
+                Begin the Journey
+                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Editorial Block -->
+      <section class="container mx-auto px-6 py-14 md:py-20">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-20 items-center">
+          <div class="order-2 md:order-1">
+            <div class="aspect-[4/5] bg-surface-container rounded-xl overflow-hidden editorial-shadow relative group">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/7/7a/RAFAEL_-_Madonna_Sixtina_%28Gem%C3%A4ldegalerie_Alter_Meister%2C_Dresden%2C_1513-14._%C3%93leo_sobre_lienzo%2C_265_x_196_cm%29.jpg"
+                alt="Raphael's Sistine Madonna"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms]"
+              />
+            </div>
+          </div>
+          <div class="order-1 md:order-2 space-y-8">
+            <div class="space-y-4">
+              <h3 class="font-serif text-3xl text-primary italic">A Path of Prayer</h3>
+              <p class="text-on-surface-variant leading-loose text-base sm:text-lg">
+                The Stations of the Cross, or Via Crucis, offer a space for profound reflection. Each station is an invitation to pause, breathe, and witness the weight of the Passion through scripture, silence, and prayer.
+              </p>
+            </div>
+            <div class="bg-primary-fixed/40 p-7 rounded-xl border-l-4 border-primary">
+              <span class="material-symbols-outlined text-primary text-3xl mb-3 block" style="font-variation-settings:'FILL' 1;">format_quote</span>
+              <p class="font-serif text-lg text-on-primary-fixed-variant leading-relaxed italic">
+                "He was wounded for our transgressions, he was bruised for our iniquities; the chastisement of our peace was upon him."
+              </p>
+              <cite class="block mt-4 font-body font-bold text-primary not-italic tracking-widest text-xs uppercase">— Isaiah 53:5</cite>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Preparation Cards -->
+      <section class="bg-surface-container-low py-14 md:py-20">
+        <div class="container mx-auto px-6">
+          <div class="text-center max-w-2xl mx-auto mb-10">
+            <h2 class="font-serif text-3xl md:text-4xl mb-4">Preparation for Prayer</h2>
+            <div class="h-px w-20 bg-outline-variant/40 mx-auto"></div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div class="bg-surface p-7 rounded-xl editorial-shadow space-y-4">
+              <div class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary">self_improvement</span>
+              </div>
+              <h4 class="font-serif text-xl">Seek Silence</h4>
+              <p class="text-on-surface-variant text-sm leading-relaxed">Find a quiet space where you can focus your heart and mind without distraction.</p>
+            </div>
+            <div class="bg-surface p-7 rounded-xl editorial-shadow space-y-4">
+              <div class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary">auto_stories</span>
+              </div>
+              <h4 class="font-serif text-xl">Sacred Text</h4>
+              <p class="text-on-surface-variant text-sm leading-relaxed">Engage with traditional liturgy and contemporary reflections for each station.</p>
+            </div>
+            <div class="bg-surface p-7 rounded-xl editorial-shadow space-y-4">
+              <div class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary">timer</span>
+              </div>
+              <h4 class="font-serif text-xl">Go Slowly</h4>
+              <p class="text-on-surface-variant text-sm leading-relaxed">Do not rush. Spend as much time as you need at each moment of the journey.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /screen-home -->
+
+
+    <!-- ════════════════════════════════════════
+         SCREEN: STATIONS LIST
+    ════════════════════════════════════════ -->
+    <div id="screen-stations" class="screen">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 py-10 md:py-16">
+
+        <!-- Intro -->
+        <section class="mb-10 md:mb-14">
+          <div class="inline-block mb-4 px-3 py-1 bg-secondary-container text-on-secondary-container text-xs font-label tracking-widest uppercase rounded-sm">Devotional Path</div>
+          <h2 class="font-serif text-4xl sm:text-5xl md:text-7xl text-primary mb-5 leading-tight tracking-tight">The Way of the Cross</h2>
+          <p class="font-serif italic text-base sm:text-lg text-on-surface-variant max-w-2xl leading-relaxed opacity-80">
+            "If anyone wishes to come after me, let him deny himself and take up his cross daily and follow me."
+          </p>
+          <!-- Progress panel -->
+          <div class="mt-8 p-5 sm:p-7 bg-surface-container-low rounded-xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-1 h-full bg-secondary rounded-l-xl"></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+              <div>
+                <span class="text-xs font-label uppercase tracking-widest text-secondary font-bold">Current Journey</span>
+                <div id="stations-progress-text" class="text-xl sm:text-2xl font-serif mt-1">0 of 14 Stations Completed</div>
+              </div>
+              <div class="w-full sm:w-48 h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+                <div id="stations-progress-bar" class="h-full bg-secondary rounded-full" style="width:0%"></div>
+              </div>
+              <button id="btn-continue-journey" onclick="continueJourney()" class="bg-primary text-on-primary px-7 py-3 rounded-lg font-label font-medium hover:opacity-90 active:scale-95 transition-all whitespace-nowrap self-start sm:self-auto">
+                Begin Prayer
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- List -->
+        <section id="stations-list-container" class="grid grid-cols-1 gap-px bg-outline-variant/15 overflow-hidden rounded-xl">
+          <!-- dynamically populated -->
+        </section>
+
+        <!-- Quote -->
+        <div class="mt-14 p-10 md:p-14 bg-primary-fixed rounded-xl text-center relative overflow-hidden">
+          <span class="absolute -top-10 -left-10 text-[200px] font-serif text-primary opacity-5 pointer-events-none italic select-none">"</span>
+          <p class="font-serif text-xl md:text-2xl text-on-primary-fixed-variant relative z-10 italic leading-relaxed">
+            "The cross is the word through which God has responded to evil in the world."
+          </p>
+          <p class="mt-5 font-label uppercase tracking-widest text-sm text-primary font-bold">— Pope Francis</p>
+        </div>
+
+      </div>
+    </div><!-- /screen-stations -->
+
+
+    <!-- ════════════════════════════════════════
+         SCREEN: STATION DETAIL
+    ════════════════════════════════════════ -->
+    <div id="screen-station" class="screen">
+      <div id="station-content">
+        <!-- dynamically populated -->
+      </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════
+         SCREEN: PRAYERS
+    ════════════════════════════════════════ -->
+    <div id="screen-prayers" class="screen">
+      <div class="max-w-2xl mx-auto px-5 sm:px-6 py-10 md:py-16 space-y-10 md:space-y-14">
+
+        <header class="text-center space-y-4">
+          <div class="inline-block mb-1 px-3 py-1 bg-secondary-container text-on-secondary-container text-xs font-label tracking-widest uppercase rounded-sm">Devotional</div>
+          <h2 class="font-serif text-4xl md:text-5xl text-primary leading-tight">Prayers of the Way</h2>
+          <p class="font-serif italic text-on-surface-variant leading-relaxed">Traditional prayers to accompany your journey through the Stations.</p>
+        </header>
+
+        <article class="bg-surface-container-low p-7 sm:p-10 rounded-xl space-y-5">
+          <h3 class="font-serif text-2xl text-primary border-l-2 border-secondary pl-5">Opening Prayer</h3>
+          <div class="font-serif text-base sm:text-lg italic leading-loose text-on-surface-variant space-y-4">
+            <p>My Lord Jesus Christ, You have made this journey to die for me with love unutterable, and I have so many times ungratefully abandoned You. But now I love You with my whole heart, and because I love You, I am sincerely sorry for having offended You.</p>
+            <p>Pardon me by Your mercy, and permit me to accompany You on this journey. You go to die for love of me; I wish, my beloved Redeemer, to die for love of You. My Jesus, I will live and die always united to You.</p>
+          </div>
+          <p class="font-serif uppercase tracking-widest text-primary text-sm font-bold">Amen.</p>
+        </article>
+
+        <article class="bg-surface-container-low p-7 sm:p-10 rounded-xl space-y-5">
+          <h3 class="font-serif text-2xl text-primary border-l-2 border-secondary pl-5">At Each Station</h3>
+          <div class="font-serif text-base sm:text-lg leading-loose space-y-3">
+            <p class="font-bold text-primary">V. We adore You, O Christ, and we bless You.</p>
+            <p class="font-bold text-secondary">R. Because by Your holy cross You have redeemed the world.</p>
+          </div>
+        </article>
+
+        <article class="bg-surface-container-low p-7 sm:p-10 rounded-xl space-y-5">
+          <h3 class="font-serif text-2xl text-primary border-l-2 border-secondary pl-5">The Fátima Prayer</h3>
+          <p class="font-serif text-base sm:text-lg italic leading-loose text-on-surface-variant">
+            O my Jesus, forgive us our sins, save us from the fires of hell, lead all souls to heaven, especially those who are in most need of Your mercy.
+          </p>
+          <p class="font-serif uppercase tracking-widest text-primary text-sm font-bold">Amen.</p>
+        </article>
+
+        <article class="bg-surface-container-low p-7 sm:p-10 rounded-xl space-y-5">
+          <h3 class="font-serif text-2xl text-primary border-l-2 border-secondary pl-5">Closing Prayer</h3>
+          <div class="font-serif text-base sm:text-lg italic leading-loose text-on-surface-variant space-y-4">
+            <p>Most merciful Jesus, Your agony in the garden, Your scourging at the pillar, Your crowning with thorns, and Your carrying of the cross — all this You endured for love of me.</p>
+            <p>Grant that I may carry my own cross with patience, and that I may have a share in the fruits of Your Redemption. May Your Passion be my strength, Your cross my comfort, and Your Resurrection my hope.</p>
+          </div>
+          <p class="font-serif uppercase tracking-widest text-primary text-sm font-bold">Amen.</p>
+        </article>
+
+        <div class="py-14 bg-primary-fixed rounded-xl overflow-hidden relative text-center px-8">
+          <div class="absolute -left-4 -top-8 opacity-10 font-serif text-[12rem] text-primary select-none">"</div>
+          <p class="font-serif text-xl md:text-2xl text-on-primary-fixed-variant leading-relaxed italic relative z-10">
+            "Lord, by Your cross and resurrection, You have set us free. You are the Saviour of the world."
+          </p>
+          <cite class="block mt-5 font-body text-xs font-bold tracking-[0.3em] uppercase text-on-primary-fixed">Traditional Acclamation</cite>
+        </div>
+
+      </div>
+    </div><!-- /screen-prayers -->
+
+
+    <!-- ════════════════════════════════════════
+         SCREEN: CLOSING REFLECTION
+    ════════════════════════════════════════ -->
+    <div id="screen-reflection" class="screen">
+      <div class="max-w-4xl mx-auto px-5 sm:px-6 pt-10 md:pt-14">
+
+        <!-- Hero -->
+        <section class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10 items-end mb-14 md:mb-20">
+          <div class="md:col-span-7">
+            <div class="relative overflow-hidden rounded-xl shadow-2xl">
+              <img
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBB1JprGSFo155QiehyeT_4Z7Q270cbLxQYt2NYs2xYHk0njcZxWoSJtc2Ek707ffexvzuNYeTpBxp-DLTsopjY2tVatDhGGha9Pc3KdIdQeekx2UbpOzV4NByWIrN6gw-ZanQfB3Z9cBsYr1OIJlpu5X73zO9dIHlpy1yd7lK_JYp1SUbJa-iUBwOarbN6Oo3d_z5p_SvXuphEXgcEfWdU78gTRAoSqe3VkVMC_WQ6MeDsgVOaTKB620fqlNDGz383JAjIHmN5S9Q"
+                alt="Empty tomb at sunrise"
+                class="w-full aspect-[4/5] object-cover"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
+            </div>
+          </div>
+          <div class="md:col-span-5 md:pb-6">
+            <h1 class="font-serif text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-primary leading-tight mb-5">
+              It is<br/><span class="italic text-secondary">Finished.</span>
+            </h1>
+            <p class="text-on-surface-variant text-base sm:text-lg leading-relaxed max-w-xs">
+              The journey of the cross concludes not in shadow, but in the soft light of the morning. Take a moment of silence to let the grace of this devotion settle within your heart.
+            </p>
+          </div>
+        </section>
+
+        <!-- Final Blessing -->
+        <section class="flex flex-col items-center mb-14 md:mb-20">
+          <div class="w-full max-w-2xl bg-surface-container-low p-9 sm:p-14 rounded-xl relative">
+            <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-surface p-3 rounded-full border border-outline-variant/20 shadow-sm">
+              <span class="material-symbols-outlined text-secondary text-3xl" style="font-variation-settings:'FILL' 1;">church</span>
+            </div>
+            <h2 class="font-serif text-xl sm:text-2xl text-center text-primary mb-10 tracking-wide uppercase">The Final Blessing</h2>
+            <div class="font-serif text-lg sm:text-xl md:text-2xl italic leading-loose text-on-surface text-center space-y-7">
+              <p>Lord Jesus, we have walked with You the path of shadows. We have felt the weight of the timber and the sting of the thorns.</p>
+              <p>Grant that the memory of Your Passion may be our strength in weakness, Your love our light in darkness, and Your Resurrection our hope for eternity.</p>
+              <p>May we leave this place of prayer carrying Your peace into a restless world, becoming living icons of Your infinite mercy.</p>
+              <p class="font-bold pt-4 not-italic">Amen.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="flex flex-col items-center space-y-9 mb-12">
+          <div class="text-center space-y-3 max-w-md">
+            <h3 class="font-body font-bold text-xs tracking-[0.2em] uppercase text-stone-500">Moment of Reflection</h3>
+            <p class="font-serif text-base sm:text-lg italic text-on-surface-variant">Which station spoke most deeply to your soul today? Hold that image as you return to your day.</p>
+          </div>
+          <div class="flex flex-col items-center gap-5">
+            <button onclick="resetJourney()" class="bg-secondary-container text-on-secondary-container px-9 py-5 rounded-lg flex items-center gap-3 shadow-lg hover:shadow-xl transition-all duration-500 active:scale-95 group">
+              <span class="font-body font-bold text-base sm:text-lg tracking-wider">Begin Again</span>
+              <span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">restart_alt</span>
+            </button>
+            <button onclick="goStations()" class="text-primary font-body font-semibold text-xs sm:text-sm tracking-widest uppercase hover:underline underline-offset-8 transition-all">
+              Review All Stations
+            </button>
+          </div>
+        </section>
+
+        <!-- Scripture Quote -->
+        <section class="mb-6 py-14 bg-primary-fixed rounded-xl overflow-hidden relative">
+          <div class="absolute -left-4 -top-8 opacity-10 font-serif text-[12rem] text-primary select-none">"</div>
+          <div class="relative z-10 px-8 md:px-16 text-center">
+            <p class="font-serif text-xl sm:text-2xl md:text-3xl text-on-primary-fixed-variant leading-relaxed italic">
+              "I am the resurrection and the life. The one who believes in me will live, even though they die."
+            </p>
+            <cite class="block mt-5 font-body text-xs font-bold tracking-[0.3em] uppercase text-on-primary-fixed">John 11:25</cite>
+          </div>
+        </section>
+
+      </div>
+    </div><!-- /screen-reflection -->
+
+  </main>
+
+
+  <!-- ─── STATION STICKY NAV BAR ─── -->
+  <div id="station-sticky-nav" class="hidden fixed left-0 right-0 z-40 px-4 py-2.5 bg-surface/95 backdrop-blur-xl border-t border-outline-variant/20 shadow-[0_-4px_16px_rgba(28,28,25,0.06)] flex items-center justify-between gap-3">
+    <button id="sticky-prev-btn" onclick="" class="flex items-center gap-1.5 text-stone-400 hover:text-primary active:text-primary transition-colors py-1 px-2 -ml-1 rounded-lg min-w-[44px] min-h-[44px]">
+      <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+      <span class="font-serif text-sm hidden sm:block">Prev</span>
+    </button>
+    <div id="sticky-station-indicator" class="flex items-center gap-2 text-center">
+      <span id="sticky-station-label" class="font-serif text-sm text-on-surface-variant italic"></span>
+      <div class="hidden sm:flex gap-0.5" id="sticky-pip-row"></div>
+    </div>
+    <button id="sticky-next-btn" onclick="" class="flex items-center gap-1.5 bg-secondary-container text-on-secondary-container hover:brightness-95 active:scale-95 transition-all px-4 py-2 rounded-lg font-serif font-bold text-sm min-h-[44px]">
+      <span id="sticky-next-label">Next Station</span>
+      <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+    </button>
+  </div>
+
+  <!-- ─── BOTTOM NAV ─── -->
+  <nav id="bottom-nav" class="bg-stone-50/90 backdrop-blur-xl fixed bottom-0 left-0 right-0 flex justify-around items-center px-2 pt-3 z-50 shadow-[0_-1px_0_rgba(28,28,25,0.06),0_-8px_24px_rgba(28,28,25,0.05)]">
+    <button onclick="goHome()" data-nav="home" class="nav-item flex flex-col items-center justify-center gap-0.5 text-stone-400 opacity-70 hover:opacity-100 active:opacity-100 transition-opacity duration-200 px-4 py-1 rounded-xl min-w-[60px]">
+      <span class="material-symbols-outlined text-[22px]">home</span>
+      <span class="font-serif text-[10px] uppercase tracking-widest">Home</span>
+    </button>
+    <button onclick="goStations()" data-nav="stations" class="nav-item flex flex-col items-center justify-center gap-0.5 text-stone-400 opacity-70 hover:opacity-100 active:opacity-100 transition-opacity duration-200 px-4 py-1 rounded-xl min-w-[60px]">
+      <span class="material-symbols-outlined text-[22px]">church</span>
+      <span class="font-serif text-[10px] uppercase tracking-widest">Stations</span>
+    </button>
+    <button onclick="goPrayers()" data-nav="prayers" class="nav-item flex flex-col items-center justify-center gap-0.5 text-stone-400 opacity-70 hover:opacity-100 active:opacity-100 transition-opacity duration-200 px-4 py-1 rounded-xl min-w-[60px]">
+      <span class="material-symbols-outlined text-[22px]">menu_book</span>
+      <span class="font-serif text-[10px] uppercase tracking-widest">Prayers</span>
+    </button>
+    <button onclick="goReflection()" data-nav="reflection" class="nav-item flex flex-col items-center justify-center gap-0.5 text-stone-400 opacity-70 hover:opacity-100 active:opacity-100 transition-opacity duration-200 px-4 py-1 rounded-xl min-w-[60px]">
+      <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
+      <span class="font-serif text-[10px] uppercase tracking-widest">Reflection</span>
+    </button>
+  </nav>
+
+
+  <!-- ─── SCRIPT ─── -->
+  <script>
+    // ─────────────────────────────────────────
+    // STATION DATA
+    // ─────────────────────────────────────────
+    const STATIONS = [
+      {
+        number: 1, roman: "I",
+        title: "Jesus is Condemned to Death",
+        image: "https://upload.wikimedia.org/wikipedia/commons/f/fa/Theophile_Lybaert_-_Pilate_condemns_Jesus_to_die.jpg",
+        scriptureText: "Then Pilate took Jesus and had him scourged... Finally Pilate handed him over to them to be crucified. So they took Jesus, and carrying the cross himself, he went out to what is called the Place of the Skull.",
+        scriptureRef: "John 19:1, 16–17",
+        reflection: [
+          "Consider the silence of the Lamb. In the face of false accusations, political expediency, and the roar of the crowd, the Word Himself remains quiet. Pilate washes his hands, but the weight of the decision remains.",
+          "How often do we, like Pilate, choose the easy path over the true one? How often do we condemn others through our indifference or our silence? In this station, we see the beginning of the journey that leads to our redemption — a journey born of a sentence of death."
+        ],
+        prayer: "Lord Jesus, You were condemned to death for our sake. Help us to accept the crosses of our lives with the same humility and trust in the Father's will. Grant us the courage to speak for the truth when it is unpopular and to stand with those who are unjustly condemned today."
+      },
+      {
+        number: 2, roman: "II",
+        title: "Jesus Carries His Cross",
+        image: "https://upload.wikimedia.org/wikipedia/commons/6/66/Theophile_Lybaert_-_Jesus_is_given_his_cross.jpg",
+        scriptureText: "So they took Jesus, and he went out, bearing his own cross, to the place called the Place of a Skull, which in Aramaic is called Golgotha.",
+        scriptureRef: "John 19:17",
+        reflection: [
+          "The weight of the world is placed upon one man's shoulders. Every sin ever committed, every act of cruelty, every broken relationship — the cross carries them all. And yet Jesus steps forward without hesitation.",
+          "What crosses do we carry in our own lives? The cross is not a punishment but a participation in the redemptive work of love. To carry our burdens with faith is to walk beside Christ on this very road."
+        ],
+        prayer: "Lord Jesus, You willingly took up the cross that was meant for us. Give us the grace to embrace our own daily crosses — our sufferings, our disappointments, our struggles — as opportunities to unite ourselves with Your redemptive love."
+      },
+      {
+        number: 3, roman: "III",
+        title: "Jesus Falls the First Time",
+        image: "https://upload.wikimedia.org/wikipedia/commons/1/18/Theophile_Lybaert_-_Jesus_falls_the_first_time.jpg",
+        scriptureText: "We all, like sheep, have gone astray; each of us has turned to our own way; and the LORD has laid on him the iniquity of us all.",
+        scriptureRef: "Isaiah 53:6",
+        reflection: [
+          "He falls. The God of the universe, in the weakness of human flesh, falls to the ground under the weight of the cross. This is not failure — it is the profoundest act of solidarity with every human being who has ever stumbled.",
+          "In our own lives, we fall. We fail. We sin and stumble in weakness. But Christ has already fallen in our place, already sanctified the act of rising again. Every time we rise after failure, we echo His resurrection."
+        ],
+        prayer: "Jesus, You fell to the ground in exhaustion and bore our weakness with You. When I fall into sin or despair, help me to remember Your first fall and Your rising again. Give me the humility to rise, the courage to continue, and the grace never to remain in the dust of my failures."
+      },
+      {
+        number: 4, roman: "IV",
+        title: "Jesus Meets His Mother",
+        image: "https://upload.wikimedia.org/wikipedia/commons/6/64/Brooklyn_Museum_-_Jesus_Meets_His_Mother_%28J%C3%A9sus_rencontre_sa_m%C3%A8re%29_-_James_Tissot.jpg",
+        scriptureText: "And a sword will pierce your own soul too — so that the thoughts of many hearts may be revealed.",
+        scriptureRef: "Luke 2:35",
+        reflection: [
+          "A mother's eyes meet those of her dying son. No words are spoken — none are needed. This is love at its most raw and most holy: the love of Mary who had pondered all things in her heart, now watching the prophecy of Simeon fulfilled.",
+          "What must it have cost her? And yet she does not flee. She stands. Mary, who said 'yes' at the Annunciation, says 'yes' again here on the road of sorrow. Her fiat endures through the darkest hour."
+        ],
+        prayer: "Sorrowful Mother, you walked this road of grief beside your Son. Intercede for all mothers who suffer alongside their children, for all who watch the ones they love enter into darkness. Teach us your faithful endurance, your silent presence, your unconditional love."
+      },
+      {
+        number: 5, roman: "V",
+        title: "Simon Helps Jesus Carry the Cross",
+        image: "https://upload.wikimedia.org/wikipedia/commons/0/07/Brooklyn_Museum_-_Simon_the_Cyrenian_Compelled_to_Carry_the_Cross_with_Jesus_%28Simon_de_Cyr%C3%A8ne_contraint_de_porter_la_Croix_avec_J%C3%A9sus%29_-_James_Tissot.jpg",
+        scriptureText: "As they were going out, they met a man from Cyrene, named Simon, and they forced him to carry the cross.",
+        scriptureRef: "Mark 15:21",
+        reflection: [
+          "Simon was not on his way to witness an execution. He was a farmer, coming in from the fields — caught, conscripted, pressed into service. He had no choice. And yet, in this forced act of service, something holy happened.",
+          "God calls us to serve at inconvenient moments, in ways we would not choose. But when we lift the crosses of others — when we sit with the grieving, when we help the struggling, when we carry what is too heavy for one person — we are Simon. And we are carrying the cross of Christ."
+        ],
+        prayer: "Lord Jesus, Simon was compelled to help You, but You accepted his help with gratitude. Help us to be willing instruments of Your mercy to others. When we encounter those who are burdened, give us the strength to stop, to help, and to carry their crosses alongside them without complaint."
+      },
+      {
+        number: 6, roman: "VI",
+        title: "Veronica Wipes Jesus' Face",
+        image: "https://upload.wikimedia.org/wikipedia/commons/a/a8/Theophile_Lybaert_-_Veronica_wipes_the_face_of_Jesus.jpg",
+        scriptureText: "He was despised and rejected by mankind, a man of suffering, and familiar with pain. Like one from whom people hide their faces he was despised, and we held him in low esteem.",
+        scriptureRef: "Isaiah 53:3",
+        reflection: [
+          "Tradition tells us of Veronica — whose name means 'true image' — who stepped out from the crowd to wipe the face of Jesus. It was a small act: a cloth pressed to a bleeding face. Yet on that cloth, the image of Christ remained.",
+          "When we wipe away the tears of another, when we look into the face of the suffering and refuse to look away, we are Veronica. And the Christ we see imprinted on the suffering of the world is the same Christ who walks before us on this road."
+        ],
+        prayer: "Lord, give us the courage of Veronica — to step out from the crowd of indifference, to draw near to those who suffer, to offer even the smallest gesture of compassion. May we see Your face in the faces of those who suffer, and may they see Your face reflected in our acts of mercy."
+      },
+      {
+        number: 7, roman: "VII",
+        title: "Jesus Falls the Second Time",
+        image: "https://upload.wikimedia.org/wikipedia/commons/f/fd/Brooklyn_Museum_-_Jesus_Falls_Beneath_the_Cross_%28J%C3%A9sus_tombe_sous_la_Croix%29_-_James_Tissot.jpg",
+        scriptureText: "I am bowed down and brought very low; all day long I go about mourning. My back is filled with searing pain; there is no health in my body.",
+        scriptureRef: "Psalm 38:6–7",
+        reflection: [
+          "He falls again. The same road, the same cross, the same onlookers — and yet this second fall is not a defeat. It is a deeper descent into the abyss of human weakness, a more complete solidarity with those of us who fail not once but repeatedly.",
+          "Perhaps you have fallen in the same way again and again. Perhaps the sin or the grief or the burden that you thought you had overcome has returned. Christ's second fall is His answer: He knows what it is to fall again. He does not condemn. He rises."
+        ],
+        prayer: "Jesus, in Your second fall You reveal that perseverance is not the absence of stumbling but the refusal to stay down. When I am overwhelmed by recurring failures or by grief that refuses to lift, remind me that You fell more than once and still carried Your cross to Calvary. Grant me the same tenacious hope."
+      },
+      {
+        number: 8, roman: "VIII",
+        title: "Jesus Meets the Women of Jerusalem",
+        image: "https://upload.wikimedia.org/wikipedia/commons/d/d8/Theophile_Lybaert_-_Jesus_meets_the_daughters_of_Jerusalem.jpg",
+        scriptureText: "Jesus turned and said to them, 'Daughters of Jerusalem, do not weep for me; weep for yourselves and for your children.'",
+        scriptureRef: "Luke 23:28",
+        reflection: [
+          "Even in His agony, Jesus looks beyond His own suffering to the suffering of others. He receives the compassion of the women and redirects it outward — toward them, toward the city, toward the future.",
+          "This is the paradox of Christ: the one who suffers most is most attentive to the suffering of others. In the midst of our own pain, we are invited to do the same — to lift our eyes from our wounds and see those who weep around us."
+        ],
+        prayer: "Compassionate Lord, even as You walked toward death, You paused to console the weeping women. Teach us to step outside our own suffering long enough to see the tears of those around us. May our shared grief become the soil in which Your compassion grows."
+      },
+      {
+        number: 9, roman: "IX",
+        title: "Jesus Falls the Third Time",
+        image: "https://upload.wikimedia.org/wikipedia/commons/3/3a/Theophile_Lybaert_-_Jesus_falls_the_third_time.jpg",
+        scriptureText: "Is it nothing to you, all who pass by? Look around and see. Is any suffering like my suffering that was inflicted on me?",
+        scriptureRef: "Lamentations 1:12",
+        reflection: [
+          "Three times fallen. The end is near — Calvary is just ahead. And yet He rises. Not with ease, not without cost, but He rises because the work is not yet finished.",
+          "Three falls. They mirror the three moments when the disciples slept in Gethsemane. They mirror the three denials of Peter. For every fall in your life, there is a grace already waiting in the rising."
+        ],
+        prayer: "Lord Jesus, Your third fall brought You to the very edge of collapse, yet You rose because love compelled You forward. When I feel I can go no further — when the weight of life has brought me to my knees for what feels like the final time — let the memory of Your third rising be the hand that reaches down and raises me."
+      },
+      {
+        number: 10, roman: "X",
+        title: "Jesus is Stripped of His Garments",
+        image: "https://upload.wikimedia.org/wikipedia/commons/0/0c/Theophile_Lybaert_-_Jesus_is_stripped_of_His_garments.jpg",
+        scriptureText: "When the soldiers crucified Jesus, they took his clothes, dividing them into four shares, one for each of them, with the undergarment remaining. They said to one another, 'Let's decide by lot who will get it.'",
+        scriptureRef: "John 19:23–24",
+        reflection: [
+          "Stripped of everything. The clothes that covered Him, the last shred of human dignity — taken. What remains? Only Christ Himself, in the nakedness of complete vulnerability and complete love.",
+          "The soldiers gamble for His garments as though they are prizes. They do not know what they are doing. And this, too, is part of the mystery: grace working through ignorance and cruelty, weaving redemption from indignity."
+        ],
+        prayer: "Lord Jesus, stripped of everything, You clothe us in Your righteousness. When we are stripped of our comforts, our reputations, our securities — when life takes from us what we thought we could not live without — remind us that we are covered by Your love, which cannot be divided or taken away."
+      },
+      {
+        number: 11, roman: "XI",
+        title: "Jesus is Nailed to the Cross",
+        image: "https://upload.wikimedia.org/wikipedia/commons/d/d5/Theophile_Lybaert_-_Jesus_is_nailed_to_the_cross.jpg",
+        scriptureText: "When they came to the place called the Skull, they crucified him there... Jesus said, 'Father, forgive them, for they do not know what they are doing.'",
+        scriptureRef: "Luke 23:33–34",
+        reflection: [
+          "'Father, forgive them.' These are the first words from the cross. Not a cry of pain, not a curse — but intercession for His executioners. This is the most radical prayer in human history: forgiveness spoken at the moment of deepest injustice.",
+          "The nails that hold Him are not iron but love. He is not trapped on the cross — He is choosing it, moment by moment, because He will not abandon us. The outstretched arms of Christ on the cross are the same arms that will welcome us home."
+        ],
+        prayer: "Lord Jesus, nailed to the cross, You prayed for those who crucified You. Teach me that forgiveness is not weakness but the most courageous act a human being can perform. Heal in me every wound of unforgiveness, every place where I have withheld mercy. May I become an echo of Your prayer: Father, forgive them."
+      },
+      {
+        number: 12, roman: "XII",
+        title: "Jesus Dies on the Cross",
+        image: "https://upload.wikimedia.org/wikipedia/commons/4/45/Theophile_Lybaert_-_Jesus_on_the_cross.jpg",
+        scriptureText: "When he had received the drink, Jesus said, 'It is finished.' With that, he bowed his head and gave up his spirit.",
+        scriptureRef: "John 19:30",
+        reflection: [
+          "It is finished. Tetelestai — a Greek word that means not merely 'it is over' but 'it is accomplished,' 'it is completed,' 'it is perfected.' Three words that carry the weight of all human history.",
+          "In this moment of apparent defeat, the greatest victory in the cosmos is achieved. The curtain of the temple is torn in two. The separation between God and humanity is ended. Death itself has swallowed something it cannot digest."
+        ],
+        prayer: "Lord Jesus, in Your final breath You gave us everything. We stand before the cross in silence, in gratitude, in wonder. Help us to never grow accustomed to the miracle of Your sacrifice. May the knowledge of what You did for us on this cross transform every moment of our lives."
+      },
+      {
+        number: 13, roman: "XIII",
+        title: "Jesus is Taken Down from the Cross",
+        image: "https://upload.wikimedia.org/wikipedia/commons/d/d1/Theophile_Lybaert_-_Jesus%27_body_is_removed_from_the_cross.jpg",
+        scriptureText: "Joseph took the body, wrapped it in a clean linen cloth, and placed it in his own new tomb that he had cut out of the rock.",
+        scriptureRef: "Matthew 27:59–60",
+        reflection: [
+          "The body of Christ is taken down and placed in the arms of His mother. The Pietà. Mary holds what she once held as an infant in Bethlehem — but now the weight is of a different kind. Silence falls over Golgotha.",
+          "There is a holiness in the act of care for the dead. Joseph of Arimathea and Nicodemus, who came by night, come now in the open — anointing, wrapping, preparing. Love does not abandon, even when it can no longer do anything but care for what remains."
+        ],
+        prayer: "Lord, in death You were held by those who loved You. May we never fear to hold those who are dying, to sit with those who grieve, to honor those who have gone before us. And when our own hour comes, may we too be held in the arms of Your everlasting love."
+      },
+      {
+        number: 14, roman: "XIV",
+        title: "Jesus is Laid in the Tomb",
+        image: "https://upload.wikimedia.org/wikipedia/commons/d/da/Theophile_Lybaert_-_Jesus_is_laid_in_the_tomb_and_covered_in_incense.jpg",
+        scriptureText: "At the place where Jesus was crucified, there was a garden, and in the garden a new tomb, in which no one had ever been laid. Because it was the Jewish day of Preparation and since the tomb was nearby, they laid Jesus there.",
+        scriptureRef: "John 19:41–42",
+        reflection: [
+          "The stone is rolled across the entrance. Darkness. Silence. Saturday arrives — the long Saturday of human history, when God seems absent, when the tomb appears to be the final word, when hope is sealed away with the dead.",
+          "But we who know what Sunday brings must learn to honor Saturday. We must learn to sit in the silence of the tomb, to wait without knowing, to trust when we cannot see. The seed does not germinate in full light. It germinates in darkness — and from that darkness, new life rises."
+        ],
+        prayer: "Lord Jesus, in the tomb You entered the darkness of death so that no human darkness would ever be beyond Your reach. On the days when my life feels like Holy Saturday — when You are silent and I cannot find You — let me remember: the tomb is not the end. You are already in the darkness before me, and You will rise."
+      }
+    ];
+
+
+    // ─────────────────────────────────────────
+    // PROGRESS (localStorage)
+    // ─────────────────────────────────────────
+    const STORAGE_KEY = 'via-crucis-v1';
+
+    function getProgress() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { completed: [] }; }
+      catch { return { completed: [] }; }
+    }
+    function saveProgress(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+    function markCompleted(n) {
+      const p = getProgress();
+      if (!p.completed.includes(n)) p.completed.push(n);
+      saveProgress(p);
+    }
+    function isCompleted(n) { return getProgress().completed.includes(n); }
+    function getCompletedCount() { return getProgress().completed.length; }
+    function resetJourney() { saveProgress({ completed: [] }); goHome(); }
+
+
+    // ─────────────────────────────────────────
+    // ROUTER
+    // ─────────────────────────────────────────
+    let currentScreen = 'home';
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + id).classList.add('active');
+      currentScreen = id;
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      updateBottomNav(id);
+      updateTopBar(id);
+      // Show/hide sticky station nav
+      const stickyNav = document.getElementById('station-sticky-nav');
+      if (id === 'station') {
+        stickyNav.classList.remove('hidden');
+        stickyNav.classList.add('flex');
+        document.body.classList.add('station-active');
+      } else {
+        stickyNav.classList.add('hidden');
+        stickyNav.classList.remove('flex');
+        document.body.classList.remove('station-active');
+      }
+    }
+
+    function goHome()       { showScreen('home'); }
+    function goStations()   { renderStationsList(); showScreen('stations'); }
+    function goPrayers()    { showScreen('prayers'); }
+    function goReflection() { showScreen('reflection'); }
+    function goStation(n)   { renderStation(n); showScreen('station'); }
+
+    function continueJourney() {
+      const p = getProgress();
+      const next = STATIONS.find(s => !p.completed.includes(s.number));
+      if (next) goStation(next.number);
+      else goReflection();
+    }
+
+    function completeStation(n) {
+      markCompleted(n);
+      if (n === 14) goReflection();
+      else goStation(n + 1);
+    }
+
+    function topBarLeftAction() {
+      if (currentScreen === 'station') goStations();
+      // else: could open a menu (no-op for now)
+    }
+
+    function updateTopBar(screen) {
+      const icon = document.getElementById('top-bar-left-icon');
+      if (screen === 'station') {
+        icon.textContent = 'arrow_back';
+      } else {
+        icon.textContent = 'menu';
+      }
+    }
+
+
+    // ─────────────────────────────────────────
+    // BOTTOM NAV HIGHLIGHT
+    // ─────────────────────────────────────────
+    function updateBottomNav(screen) {
+      const map = { home:'home', stations:'stations', station:'stations', prayers:'prayers', reflection:'reflection' };
+      const active = map[screen] || screen;
+      document.querySelectorAll('.nav-item').forEach(el => {
+        const name = el.dataset.nav;
+        const icon = el.querySelector('.material-symbols-outlined');
+        if (name === active) {
+          el.classList.remove('text-stone-400', 'opacity-70');
+          el.classList.add('text-amber-700', 'scale-105');
+          icon.style.fontVariationSettings = "'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24";
+        } else {
+          el.classList.remove('text-amber-700', 'scale-105');
+          el.classList.add('text-stone-400', 'opacity-70');
+          icon.style.fontVariationSettings = "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24";
+        }
+      });
+    }
+
+
+    // ─────────────────────────────────────────
+    // RENDER: STATIONS LIST
+    // ─────────────────────────────────────────
+    function renderStationsList() {
+      const completed = getCompletedCount();
+      const pct = Math.round((completed / 14) * 100);
+
+      document.getElementById('stations-progress-text').textContent =
+        `${completed} of 14 Stations Completed`;
+      document.getElementById('stations-progress-bar').style.width = pct + '%';
+
+      const btn = document.getElementById('btn-continue-journey');
+      if (completed === 0)       btn.textContent = 'Begin Prayer';
+      else if (completed === 14) btn.textContent = 'View Reflection';
+      else                       btn.textContent = 'Continue Prayer';
+
+      const p = getProgress();
+      // First uncompleted station number
+      const firstUncompleted = STATIONS.find(s => !p.completed.includes(s.number))?.number ?? null;
+
+      const container = document.getElementById('stations-list-container');
+      container.innerHTML = STATIONS.map(s => {
+        const done = isCompleted(s.number);
+        const isCurrent = s.number === firstUncompleted;
+        const thumbHtml = s.image
+          ? `<img src="${s.image}" alt="Station ${s.roman}" class="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover rounded-lg${done ? ' grayscale group-hover:grayscale-0 transition-all duration-700' : isCurrent ? ' shadow-xl' : ' grayscale transition-all duration-700'}"/>`
+          : `<div class="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg thumb-placeholder flex items-center justify-center flex-shrink-0"><span class="font-serif text-xl text-white/60 italic">${s.roman}</span></div>`;
+
+        if (done) {
+          return `
+          <div onclick="goStation(${s.number})" class="group bg-surface hover:bg-surface-container-low transition-colors duration-300 p-4 sm:p-6 md:p-8 flex items-center gap-4 sm:gap-6 md:gap-10 relative cursor-pointer">
+            <div class="absolute right-6 top-1/2 -translate-y-1/2 opacity-10 group-hover:opacity-20 pointer-events-none hidden md:block">
+              <span class="font-serif text-8xl italic text-primary select-none">${s.roman}</span>
+            </div>
+            <div class="relative flex-shrink-0">${thumbHtml}
+              <div class="absolute -top-2 -right-2 bg-secondary text-white w-6 h-6 rounded-full flex items-center justify-center shadow-lg">
+                <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">check</span>
+              </div>
+            </div>
+            <div class="flex-grow min-w-0">
+              <div class="flex items-center gap-2 mb-0.5">
+                <span class="text-secondary font-serif text-base sm:text-lg font-bold italic">${s.roman}.</span>
+                <span class="text-xs font-label uppercase tracking-[0.15em] text-on-surface-variant">Completed</span>
+              </div>
+              <h3 class="font-serif text-lg sm:text-2xl md:text-3xl text-primary leading-snug">${s.title}</h3>
+            </div>
+            <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors flex-shrink-0 hidden sm:block">chevron_right</span>
+          </div>`;
+        }
+        if (isCurrent) {
+          return `
+          <div onclick="goStation(${s.number})" class="group bg-surface-container-high p-4 sm:p-6 md:p-8 flex items-center gap-4 sm:gap-6 md:gap-10 relative ring-1 ring-inset ring-secondary/25 cursor-pointer">
+            <div class="relative flex-shrink-0 pt-2">${thumbHtml}
+              <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-2 py-0.5 rounded text-[9px] font-label uppercase tracking-tight whitespace-nowrap">Next Up</div>
+            </div>
+            <div class="flex-grow min-w-0">
+              <div class="flex items-center gap-2 mb-0.5">
+                <span class="text-primary font-serif text-base sm:text-lg font-bold italic">${s.roman}.</span>
+                <span class="text-xs font-label uppercase tracking-[0.15em] text-secondary font-bold">Current</span>
+              </div>
+              <h3 class="font-serif text-lg sm:text-2xl md:text-3xl text-primary leading-snug">${s.title}</h3>
+            </div>
+            <div class="w-10 h-10 rounded-full border border-primary/25 flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-all flex-shrink-0 hidden sm:flex">
+              <span class="material-symbols-outlined text-sm">play_arrow</span>
+            </div>
+          </div>`;
+        }
+        // Locked / future
+        return `
+        <div onclick="goStation(${s.number})" class="group bg-surface hover:bg-surface-container-low transition-colors duration-300 p-4 sm:p-6 md:p-8 flex items-center gap-4 sm:gap-6 md:gap-10 relative cursor-pointer">
+          <div class="absolute right-6 top-1/2 -translate-y-1/2 opacity-5 pointer-events-none hidden md:block">
+            <span class="font-serif text-8xl italic select-none">${s.roman}</span>
+          </div>
+          <div class="relative flex-shrink-0 opacity-35 group-hover:opacity-90 transition-opacity">${thumbHtml}</div>
+          <div class="flex-grow min-w-0">
+            <span class="text-stone-400 font-serif text-base sm:text-lg font-bold italic">${s.roman}.</span>
+            <h3 class="font-serif text-lg sm:text-2xl md:text-3xl text-on-surface-variant/55 group-hover:text-primary leading-snug transition-colors">${s.title}</h3>
+          </div>
+          <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors flex-shrink-0 hidden sm:block">chevron_right</span>
+        </div>`;
+      }).join('');
+    }
+
+
+    // ─────────────────────────────────────────
+    // UPDATE STICKY NAV
+    // ─────────────────────────────────────────
+    function updateStickyNav(n) {
+      const s = STATIONS[n - 1];
+      const prev = n > 1 ? STATIONS[n - 2] : null;
+      const next = n < 14 ? STATIONS[n] : null;
+
+      // Label
+      document.getElementById('sticky-station-label').textContent =
+        `Station ${s.roman} of XIV`;
+
+      // Progress pips (desktop)
+      const pipRow = document.getElementById('sticky-pip-row');
+      pipRow.innerHTML = STATIONS.map(st => {
+        const done = isCompleted(st.number);
+        const isCurrent = st.number === n;
+        const base = 'w-1.5 h-1.5 rounded-full transition-all duration-300 ';
+        if (isCurrent)  return `<span class="${base}bg-primary scale-125"></span>`;
+        if (done)       return `<span class="${base}bg-secondary"></span>`;
+        return              `<span class="${base}bg-outline-variant"></span>`;
+      }).join('');
+
+      // Prev button
+      const prevBtn = document.getElementById('sticky-prev-btn');
+      if (prev) {
+        prevBtn.onclick = () => goStation(n - 1);
+        prevBtn.classList.remove('invisible');
+      } else {
+        prevBtn.onclick = () => goStations();
+        prevBtn.classList.remove('invisible');
+      }
+
+      // Next button
+      const nextBtn = document.getElementById('sticky-next-btn');
+      const nextLabel = document.getElementById('sticky-next-label');
+      const nextIcon = nextBtn.querySelector('.material-symbols-outlined');
+      if (next) {
+        nextLabel.textContent = `Station ${next.roman}`;
+        nextIcon.textContent = 'arrow_forward';
+        nextBtn.onclick = () => completeStation(n);
+      } else {
+        nextLabel.textContent = 'Finish';
+        nextIcon.textContent = 'done_all';
+        nextBtn.onclick = () => completeStation(n);
+      }
+    }
+
+    // ─────────────────────────────────────────
+    // RENDER: STATION DETAIL
+    // ─────────────────────────────────────────
+    function renderStation(n) {
+      const s = STATIONS[n - 1];
+      const prev = n > 1 ? STATIONS[n - 2] : null;
+      const next = n < 14 ? STATIONS[n] : null;
+      const done = isCompleted(n);
+
+      // Hero
+      const heroHtml = s.image
+        ? `<img src="${s.image}" alt="Station ${s.roman}" class="w-full h-full object-cover"/>`
+        : `<div class="w-full h-full station-hero-placeholder flex items-center justify-center">
+             <span class="font-serif text-[8rem] md:text-[12rem] italic text-white/15 select-none">${s.roman}</span>
+           </div>`;
+
+      // Reflection paragraphs
+      const reflHtml = s.reflection.map(p => `<p>${p}</p>`).join('');
+
+      // Prev button
+      const prevHtml = prev
+        ? `<button onclick="goStation(${n - 1})" class="flex items-center gap-3 text-stone-500 hover:text-primary transition-all duration-300 group">
+             <span class="material-symbols-outlined transition-transform group-hover:-translate-x-1">arrow_back</span>
+             <div class="text-left">
+               <span class="block text-[10px] uppercase tracking-widest opacity-60">Previous</span>
+               <span class="font-serif text-base sm:text-lg">Station ${prev.roman}</span>
+             </div>
+           </button>`
+        : `<button onclick="goStations()" class="flex items-center gap-3 text-stone-500 hover:text-primary transition-all duration-300 group">
+             <span class="material-symbols-outlined transition-transform group-hover:-translate-x-1">arrow_back</span>
+             <div class="text-left">
+               <span class="block text-[10px] uppercase tracking-widest opacity-60">Back to</span>
+               <span class="font-serif text-base sm:text-lg">All Stations</span>
+             </div>
+           </button>`;
+
+      // Next/finish button
+      const nextLabel  = next ? `Continue to Station ${next.roman}` : 'Finish Journey';
+      const nextIcon   = next ? 'arrow_forward' : 'done_all';
+      const nextSubtitle = next ? 'Continue to' : 'Complete';
+      const nextHtml = `<button onclick="completeStation(${n})" class="bg-secondary-container text-on-secondary-container px-7 sm:px-10 py-4 sm:py-5 rounded-md flex items-center gap-4 sm:gap-6 shadow-sm hover:shadow-md transition-all duration-300 group active:scale-95">
+           <div class="text-right">
+             <span class="block text-[10px] uppercase tracking-widest opacity-80">${nextSubtitle}</span>
+             <span class="font-serif text-base sm:text-lg font-bold">${next ? 'Station ' + next.roman : 'Finish Journey'}</span>
+           </div>
+           <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">${nextIcon}</span>
+         </button>`;
+
+      // "Already completed" revisit note
+      const revisitBanner = done
+        ? `<div class="mx-6 md:mx-16 lg:mx-24 mt-6 p-4 bg-secondary-container/40 rounded-xl flex items-center gap-3 text-on-secondary-container">
+             <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1;">check_circle</span>
+             <span class="text-sm font-label">You have completed this station. Continue your journey whenever you are ready.</span>
+           </div>`
+        : '';
+
+      updateStickyNav(n);
+
+      document.getElementById('station-content').innerHTML = `
+        <!-- Hero -->
+        <section class="relative w-full aspect-[3/4] sm:aspect-[4/3] md:aspect-[16/10] overflow-hidden bg-surface-container-high">
+          ${heroHtml}
+          <div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+        </section>
+
+        <!-- Title -->
+        <header class="px-5 sm:px-8 -mt-14 relative z-10 text-center mb-10 md:mb-14">
+          <div class="inline-block bg-primary px-5 py-1.5 mb-5 rounded-sm">
+            <span class="text-on-primary font-serif uppercase tracking-[0.2em] text-xs">Station ${s.roman}</span>
+          </div>
+          <h2 class="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-primary leading-tight tracking-tight">${s.title}</h2>
+          <div class="w-16 h-px bg-outline-variant mx-auto opacity-30 mt-6"></div>
+        </header>
+
+        ${revisitBanner}
+
+        <!-- Body -->
+        <div class="px-5 sm:px-8 md:px-16 lg:px-24 space-y-14 md:space-y-18 max-w-screen-md mx-auto">
+
+          <!-- Scripture -->
+          <section class="space-y-5">
+            <span class="font-serif italic text-secondary text-lg">Scripture Reading</span>
+            <div class="bg-surface-container-low p-7 sm:p-10 relative overflow-hidden">
+              <span class="material-symbols-outlined absolute -top-4 -left-4 text-9xl opacity-[0.03] text-primary">format_quote</span>
+              <blockquote class="font-serif text-lg sm:text-xl md:text-2xl leading-relaxed text-on-surface-variant italic relative z-10">
+                "${s.scriptureText}"
+              </blockquote>
+              <cite class="block mt-5 font-label text-xs sm:text-sm uppercase tracking-widest text-secondary font-semibold">— ${s.scriptureRef}</cite>
+            </div>
+          </section>
+
+          <!-- Reflection -->
+          <section class="space-y-5 md:space-y-6">
+            <h3 class="font-serif text-xl sm:text-2xl text-primary border-l-2 border-secondary pl-5">Reflection</h3>
+            <div class="text-base sm:text-lg leading-loose text-on-surface space-y-5 max-w-prose">
+              ${reflHtml}
+            </div>
+          </section>
+
+          <!-- Versicle -->
+          <section class="flex flex-col sm:flex-row items-stretch gap-px overflow-hidden rounded-xl border border-outline-variant/20">
+            <div class="flex-1 bg-surface-container-low px-6 py-5 flex flex-col gap-1">
+              <span class="font-label text-xs uppercase tracking-widest text-secondary font-bold">V.</span>
+              <p class="font-serif text-base sm:text-lg text-on-surface">We adore You, O Christ, and we bless You.</p>
+            </div>
+            <div class="flex-1 bg-primary-fixed/40 px-6 py-5 flex flex-col gap-1">
+              <span class="font-label text-xs uppercase tracking-widest text-primary font-bold">R.</span>
+              <p class="font-serif text-base sm:text-lg italic text-on-primary-fixed-variant">Because by Your holy cross You have redeemed the world.</p>
+            </div>
+          </section>
+
+          <!-- Prayer -->
+          <section class="bg-primary-container/10 border-t border-b border-outline-variant/15 py-10 sm:py-12 px-5 sm:px-8">
+            <div class="max-w-prose mx-auto text-center space-y-6">
+              <span class="material-symbols-outlined text-secondary text-4xl" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
+              <h3 class="font-serif text-xl sm:text-2xl text-primary">The Prayer</h3>
+              <p class="font-serif text-lg sm:text-xl leading-relaxed italic text-on-primary-fixed-variant">${s.prayer}</p>
+              <p class="font-serif uppercase tracking-widest text-primary pt-2">Amen.</p>
+            </div>
+          </section>
+
+          <!-- Navigation -->
+          <footer class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 py-10 sm:py-14 border-t border-outline-variant/10">
+            ${prevHtml}
+            ${nextHtml}
+          </footer>
+
+        </div>
+      `;
+    }
+
+
+    // ─────────────────────────────────────────
+    // INIT
+    // ─────────────────────────────────────────
+    goHome();
+  </script>
+</body>
+</html>
